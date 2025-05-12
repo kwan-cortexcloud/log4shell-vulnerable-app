@@ -40,7 +40,7 @@ kind: Deployment
 metadata:
   name: "log4shell"
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: log4shell-vuln-app
@@ -51,6 +51,6 @@ spec:
     spec:
       containers:
         - name: log4shell-vuln-app
-          image: kathywan/log4shell-vulnerable-app
+          image: 026090560085.dkr.ecr.us-east-2.amazonaws.com/log4shell-vulnerable-app:af97c1a
           ports:
             - containerPort: 8080
