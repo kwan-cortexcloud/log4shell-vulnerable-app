@@ -21,7 +21,7 @@ env:
 jobs:
   cortex-code-scan:
     runs-on: ubuntu-latest
-
+    environment: CortexCloudEnv
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
@@ -55,20 +55,13 @@ jobs:
           --create-repo-if-missing
   
   build:
-    # needs: checkov_scan
+    needs: cortex-code-scan
     runs-on: ubuntu-latest
     name: Build Image and Push to Registry
-    # environment: DockerEnv
     environment: AWSEnv
     steps:
     - name: Get short SHA
       run: echo "GHA_SHA=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
-          
-    # - name: Docker Login
-    #   uses: docker/login-action@v3
-    #   with:
-    #     username: ${{ secrets.DOCKERHUB_USERNAME }}
-    #     password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@master
