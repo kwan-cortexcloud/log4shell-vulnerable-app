@@ -43,9 +43,9 @@ jobs:
     - name: Run Docker Container
       run: |
         docker run --rm -v ${{ github.workspace }}:/home/code cortexcli:${{ env.CORTEX_CLI_VERSION }} \
-          --api-base-url ${{CORTEX_API_URL}} \
-          --api-key ${{CORTEX_API_KEY}} \
-          --api-key-id ${{CORTEX_API_KEY_ID}} \
+          --api-base-url ${{ env.CORTEX_API_URL }}\
+          --api-key ${{ env.CORTEX_API_KEY }} \
+          --api-key-id ${{ env.CORTEX_API_KEY_ID }}\
           code scan \
           --directory /home/code \
           --repo-id ${{github.repository}} \
