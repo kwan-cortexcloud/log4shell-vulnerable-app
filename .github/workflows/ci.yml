@@ -51,7 +51,7 @@ jobs:
       CORTEX_API_KEY: ${{secrets.CORTEX_API_KEY}}
       CORTEX_API_KEY_ID: ${{secrets.CORTEX_API_KEY_ID}}
       CORTEX_API_URL: https://api-ms-cxsiamp.xdr.us.paloaltonetworks.com
-      CORTEX_CLI_VERSION: 0.10.12
+      CORTEX_CLI_VERSION: 0.11.0
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
