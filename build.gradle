@@ -30,7 +30,7 @@ test {
 
 sonar {
   properties {
-    property "sonar.projectKey", "kwan-prismacloud_log4shell-vulnerable-app_cb84b92a-a84d-40be-b2b9-5e09f7c336e9"
+    property "sonar.projectKey", "kwan-cortexcloud_log4shell-vulnerable-app_8989062d-0810-4c35-9f85-22d618b41fbf"
     property "sonar.projectName", "log4shell-vulnerable-app"
 	property "sonar.host.url", "http://k8s-ekspcsgroup-7fca46cf51-2067601915.us-east-2.elb.amazonaws.com/sonarqube"
   }
