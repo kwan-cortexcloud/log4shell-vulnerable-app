@@ -63,7 +63,7 @@ jobs:
           -H 'x-crtx-auth-id: ${{ secrets.CORTEX_API_COLLECTTOR_KEY_ID }}' \
           -H 'Authorization: ${{ secrets.CORTEX_API_COLLECTTOR_KEY }}' \
           -H 'Content-Type: application/json' \
-          --location '${{vars.CORTEX_API_URL}}/public_api/appsec/v1/collectors/${{ vars.CORTEX_COLLECTOR_ID }}?repository_id=${{ vars.CORTEX_REPO_ASSET_ID }}&branch=$GITHUB_REF_NAME' \
+          --location '${{vars.CORTEX_API_URL}}/public_api/appsec/v1/collectors/${{ vars.CORTEX_COLLECTOR_ID }}?repository_id=${{ vars.CORTEX_REPO_ASSET_ID }}&branch=${GITHUB_REF_NAME}' \
           -d @./semgrep.sarif
 
   cortex-code-scan:
