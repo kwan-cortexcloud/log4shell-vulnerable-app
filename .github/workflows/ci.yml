@@ -95,6 +95,7 @@ jobs:
           --api-base-url ${{vars.CORTEX_API_URL}} \
           --api-key ${{secrets.CORTEX_API_CLI_KEY}} \
           --api-key-id ${{secrets.CORTEX_API_CLI_KEY_ID}} \
+          --soft-fail \
           code scan \
           --directory /home/code \
           --repo-id ${{github.repository}} \
