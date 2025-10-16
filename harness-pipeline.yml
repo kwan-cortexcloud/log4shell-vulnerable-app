@@ -1,0 +1,94 @@
+pipeline:
+  name: ECR Build and CortexCLI Scan
+  identifier: ecrBuildAndCortexCLIScan
+  projectIdentifier: default
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Build, Scan, and Push Image
+        identifier: buildScanAndPushImage
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Build Docker Image
+                  identifier: buildDockerImage
+                  spec:
+                    command: |
+                      export ECR_IMAGE_FULL_NAME="<+pipeline.variables.awsAccountId>.dkr.ecr.<+pipeline.variables.awsRegion>.amazonaws.com/<+pipeline.variables.ecrRepoName>:<+pipeline.sequenceId>"
+                      echo "Building image: $ECR_IMAGE_FULL_NAME"
+                      docker build -t $ECR_IMAGE_FULL_NAME .
+              - step:
+                  type: Run
+                  name: Scan with Twistlock
+                  identifier: scanWithTwistlock
+                  spec:
+                    command: |
+                      # download cortexcli
+                      crtx_resp=$(curl '<+secrets.getValue("CORTEX_API_URL")>/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64' \
+                        -H 'x-xdr-auth-id: <+secrets.getValue("CORTEX_API_KEY_ID")>' \
+                        -H 'Authorization: <+secrets.getValue("CORTEX_API_KEY")>')
+                      crtx_url=$(echo $crtx_resp | jq -r ".signed_url")
+                      curl -o cortexcli $crtx_url
+                      chmod +x cortexcli
+                      ./cortexcli --version
+
+                      # run cortexcli image scan
+                      export ECR_IMAGE_FULL_NAME="<+pipeline.variables.awsAccountId>.dkr.ecr.<+pipeline.variables.awsRegion>.amazonaws.com/<+pipeline.variables.ecrRepoName>:<+pipeline.sequenceId>"
+                      echo "Starting cortexcli scan on local image: $ECR_IMAGE_FULL_NAME"
+                      ./cortexcli \
+                      --api-base-url '<+secrets.getValue("CORTEX_API_URL")>' \
+                      --api-key '<+secrets.getValue("CORTEX_API_KEY")>' \
+                      --api-key-id '<+secrets.getValue("CORTEX_API_KEY_ID")>' \
+                      image scan "$ECR_IMAGE_FULL_NAME" \
+                      --name "$ECR_IMAGE_FULL_NAME" \
+                      --ci-pipeline-id "kwan-<+pipeline.identifier>" \
+                      --ci-build-id "<+pipeline.sequenceId>"                      
+              
+              - step:
+                  type: Run
+                  name: Push to ECR
+                  identifier: pushToECR
+                  spec:
+                    command: |
+                      # This step assumes the Harness runner has AWS credentials configured.
+                      export ECR_IMAGE_FULL_NAME="<+pipeline.variables.awsAccountId>.dkr.ecr.<+pipeline.variables.awsRegion>.amazonaws.com/<+pipeline.variables.ecrRepoName>:<+pipeline.sequenceId>"
+
+                      echo "Logging in to ECR..."
+                      aws ecr get-login-password --region "<+pipeline.variables.awsRegion>" | docker login --username AWS --password-stdin "<+pipeline.variables.awsAccountId>.dkr.ecr.<+pipeline.variables.awsRegion>.amazonaws.com"
+
+                      echo "Pushing image to ECR: $ECR_IMAGE_FULL_NAME"
+                      docker push "$ECR_IMAGE_FULL_NAME"
+  variables:
+    - name: awsConnector
+      type: String
+      description: "The Harness AWS Connector with ECR permissions."
+      required: true
+      value: "YOUR_AWS_CONNECTOR_ID"
+    - name: awsRegion
+      type: String
+      description: "The AWS region where the ECR repository is located."
+      required: true
+      value: "us-east-2"
+    - name: awsAccountId
+      type: String
+      description: "Your AWS Account ID."
+      required: true
+      value: "123456789012"
+    - name: ecrRepoName
+      type: String
+      description: "The name of your ECR repository."
+      required: true
+      value: "log4shell-vulnerable-app"
+
